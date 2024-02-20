@@ -3,15 +3,19 @@ rm(list = ls())
 library(httr);library(jsonlite);library(dplyr);library(ggplot2);library(readxl);library(tidyr);library(patchwork)
 #install.packages("")
 
+# Reading in the data ----------------------------------------------------------------
 data.file <- "Q:\\My Drive\\Code Repositories\\R\\FeSSA\\data files\\Fe-SSA_Plaas.xlsx"
 
 FeSSA_with_shipping <- read_excel(data.file, sheet = "with_shipping")
 FeSSA_without_shipping <- read_excel(data.file, sheet = "without_shipping")
 
+
+# Visualizing the model (MIMI) outputs -----------------------------------------------
+
 # Calculate the averages of the columns
 averages <- FeSSA_with_shipping %>%
   summarise(across(starts_with("FE"), mean, na.rm = TRUE)) %>% 
-  select(-FESUM)
+  select(-FESUM, -FEAGEDSSA)
 
 # Reshape the data to long format for ggplot
 averages_long <- tidyr::pivot_longer(averages, cols = starts_with("FE"),
@@ -26,13 +30,13 @@ with_shipping <- ggplot() +
            aes(x = "FETOTSRF", y = Average, fill = Category),
            stat = "identity", position = "dodge") +
   theme_minimal() +
-  labs(x = NULL, y = "Average Fe conc. in aerosol (kg/kg)", title = "Fe in the Arctic (Nov-Dec 2018) W/ Shipping") +
+  labs(x = NULL, y = "Average Fe conc. in aerosol (ug/m3)", title = "Fe in the Arctic (Nov-Dec 2018) W/ Shipping") +
   theme(axis.text.x = element_blank(), legend.position = "bottom")
 
 # Calculate the averages of the columns
 averages <- FeSSA_without_shipping %>%
   summarise(across(starts_with("FE"), mean, na.rm = TRUE)) %>% 
-  select(-FESUM)
+  select(-FESUM, -FEAGEDSSA)
 
 # Reshape the data to long format for ggplot
 averages_long <- tidyr::pivot_longer(averages, cols = starts_with("FE"),
@@ -47,7 +51,23 @@ without_shipping <- ggplot() +
            aes(x = "FETOTSRF", y = Average, fill = Category),
            stat = "identity", position = "dodge") +
   theme_minimal() +
-  labs(x = NULL, y = "Average Fe conc. in aerosol (kg/kg)", title = "Fe in the Arctic (Nov-Dec 2018) W/out Shipping") +
+  labs(x = NULL, y = "Average Fe conc. in aerosol (ug/m3)", title = "Fe in the Arctic (Nov-Dec 2018) W/out Shipping") +
   theme(axis.text.x = element_blank(), legend.position = "bottom")
 
 with_shipping + without_shipping
+
+
+# Comparing the measurements to the model outputs ---------------------------------------------
+# Calculate the averages of the columns
+averages <- FeSSA_without_shipping %>%
+  summarise(across(starts_with("FE"), mean, na.rm = TRUE)) %>% 
+  select(-FESUM)
+
+# Reshape the data to long format for ggplot
+averages_long <- tidyr::pivot_longer(averages, cols = starts_with("FE"),
+                                     names_to = "Category", values_to = "Average") %>%
+                 select(FETOTSRF, FEAGEDSSA)
+
+ colnames(averages)              
+
+
