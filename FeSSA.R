@@ -70,4 +70,13 @@ averages_long <- tidyr::pivot_longer(averages, cols = starts_with("FE"),
 
  colnames(averages)              
 
-
+#test commit. Is this showing up in Github? 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ # is this line registering as a change
+ 
